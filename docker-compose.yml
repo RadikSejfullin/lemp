@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  nginx:
+    container_name: nginx
+    build: nginx
+    volumes:
+      - type: volume
+        source: wp_data
+        target: /opt/wordpress
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    restart: always
+    networks:
+      - common
+  mariadb:
+    container_name: mariadb
+    build: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+    networks:
+      - common
+  wordpress:
+    container_name: wordpress
+    build: wordpress
+    volumes:
+      - type: bind
+        source: /opt/LEMP/wordpress/tools/wp-config.php
+        target: /opt/wordpress/wp-config.php
+      - type: volume
+        source: wp_data
+        target: /opt/wordress
+    #volumes:
+    #  - ./wordpress/volumes:/opt/wordpress
+    restart: always
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mariadb
+    networks:
+      - common
+networks: 
+  common:
+    driver: bridge
+
+volumes:
+  wp_data:
